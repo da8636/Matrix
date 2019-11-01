@@ -1,0 +1,156 @@
+typedef struct {
+	size_t id;
+	const float* list;
+	float result;
+	float otherValue;
+	float* copymatrix;
+} parallel_args;
+
+
+parallel_args* parallelFunction(const float* matrix, void* (*f)(void*), float otherValue, float* matrixcopy){
+
+	parallel_args* args = malloc(sizeof(parallel_args) * g_nthreads);
+	for (size_t n = 1; n <= g_nthreads; n++){
+		for (size_t i = 0; i < g_nthreads; i++){
+			args[i] = (parallel_args){
+				.id = i,
+				.list = matrix,
+				.result = 0,
+				.otherValue = otherValue,
+				.copymatrix = matrixcopy
+			};
+		}
+
+		pthread_t thread_ids[g_nthreads];
+
+		//Launch threads
+		for (size_t i = 0; i < g_nthreads; i++){
+			pthread_create(thread_ids + i, NULL, f, args + i);
+		}
+
+		//wait for threads to finishs
+		for (size_t i = 0; i < g_nthreads; i++){
+			pthread_join(thread_ids[i], NULL);
+		}
+	}
+	return args;
+
+}
+
+
+
+
+
+void* parallelFreq(void* args){
+	parallel_args* sargs = (parallel_args*) args;
+
+	const size_t start = sargs->id * (g_elements/g_nthreads);
+	const size_t end = sargs->id == g_nthreads - 1 ? g_elements : (sargs->id + 1) * (g_elements/g_nthreads);
+
+	float value = sargs->otherValue;
+	ssize_t freq = 0;
+	for (size_t i = start; i < end; i++) {
+		if (sargs->list[i] == value){
+			//sargs->result += 1;
+			freq++;
+		}
+	}
+	sargs->result = freq;
+
+	return NULL;
+
+}
+
+
+/**
+ * Returns the frequency of the given value in the matrix.
+ */
+ssize_t get_frequency(const float* matrix, float value){
+
+	ssize_t freq = 0;
+	parallel_args* args = parallelFunction(matrix, parallelFreq, value, NULL);
+
+
+	//Calculate freq
+	for (int i = 0; i < g_nthreads; i++){
+			freq += args[i].result;
+	}
+
+
+	free(args);
+	return freq;
+
+
+
+
+	// for (int i = g_elements; --i >= 0;){
+	// 	if (matrix[i] == value)
+	// 		freq += 1;
+	// }
+
+	/*
+		TODO
+
+		1 1
+		1 1 :: 1 => 4
+
+		1 0
+		0 1 :: 2 => 0
+	*/
+
+	// return freq;
+}
+
+
+
+
+
+
+
+void* parallelSum(void* args){
+	parallel_args* sargs = (parallel_args*) args;
+
+	const size_t start = sargs->id * (g_elements/g_nthreads);
+	const size_t end = sargs->id == g_nthreads - 1 ? g_elements : (sargs->id + 1) * (g_elements/g_nthreads);
+
+	for (size_t i = start; i < end; i++) {
+		sargs->result += sargs->list[i];
+	}
+
+	return NULL;
+
+}
+
+/**
+ * Returns the sum of all elements.
+ */
+float get_sum(const float* matrix) {
+
+	parallel_args* args = parallelFunction(matrix, parallelSum, 0, NULL);
+	float sum = 0;
+	//Calculate total sum
+	for (size_t i = 0; i < g_nthreads; i++){
+		sum += args[i].result;
+	}
+
+	free(args);
+	return sum;
+
+	// float sum = 0;
+	//
+	// for (int i = 0; i < g_elements; i++){
+	// 		sum += matrix[i];
+	// }
+
+	/*
+		TODO
+
+		2 1
+		1 2 => 6
+
+		1 1
+		1 1 => 4
+	*/
+	//
+	// return sum;
+}
