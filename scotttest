@@ -1,0 +1,6 @@
+set a = random 1
+set b = random 2
+set a = scalar.mul a 0.0001
+set b = scalar.mul b -0.0001
+compute sum a 
+compute sum b 

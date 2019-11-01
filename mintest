@@ -1,0 +1,3 @@
+set a = sequence 1 1
+compute maximum a
+

@@ -1,0 +1,27 @@
+SET a = sequence 1 1
+SHOW a
+SET b = rotated a
+SHOW b
+SET c = reversed a
+SHOW c
+SET d = transposed a
+SHOW d
+SET e = identity
+SET f = sequence 5 1
+SHOW f
+SET g = matrix.mul a e
+SHOW g
+SET h = matrix.mul a f
+SHOW h
+SET i = matrix.pow a 1
+SHOW i
+SET j = matrix.pow a 6
+SHOW j
+SET k = matrix.pow a 0
+SHOW k
+SET l = random 5
+SHOW l
+COMPUTE determinant l
+SHOW a
+SET t = matrix.conv a sharpen
+SHOW t

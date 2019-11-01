@@ -1,0 +1,10 @@
+SET a = sequence 1 1
+SHOW a
+SET b = matrix.pow a 0
+SHOW b
+SET c = matrix.pow a 1
+SHOW c
+SET d = matrix.pow a 2
+SHOW d
+SET e = matrix.pow a 7
+SHOW e
